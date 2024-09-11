@@ -1,6 +1,7 @@
 module shader;
 import opengl::gl;
 import std::io;
+import libc;
 
 def Shader = uint;
 def ShaderProgram = uint;
@@ -14,7 +15,7 @@ fn Shader compileFromSource(char[] source, ShaderType type) {
     }
 
     // compile
-	int lenght = source.len;
+    int lenght = source.len;
     gl::shaderSource(shader, 1, (char **)&source, &lenght);
     gl::compileShader(shader);
 
@@ -23,15 +24,18 @@ fn Shader compileFromSource(char[] source, ShaderType type) {
     gl::getShaderiv(shader, gl::GL_COMPILE_STATUS, &success);
     if (!success) {
         // print error log
-        char *infoLog = malloc(gl::GL_INFO_LOG_LENGTH * char.sizeof);
+        int infoLength;
+        gl::getShaderiv(shader, gl::GL_INFO_LOG_LENGTH, &infoLength);
+        char* infoLog = malloc(infoLength * char.sizeof);
         free(infoLog);
 
-        gl::getShaderInfoLog(shader, 512, null, infoLog);
-        io::printfn("shader(%d) compilation failed:\n"
+        gl::getShaderInfoLog(shader, infoLength, null, infoLog);
+        libc::printf("shader(%d) compilation failed:\n"
 				   "    %s\n", shader, infoLog);
 
         // clear shader
         gl::deleteShader(shader);
+        return 0;
     }
 
     return shader;
@@ -55,15 +59,18 @@ fn ShaderProgram linkShaders(Shader[] shaders) {
     gl::getProgramiv(shaderProgram, gl::GL_LINK_STATUS, &success);
     if (!success) {
         // print error log
-        char *infoLog = malloc(gl::GL_INFO_LOG_LENGTH * char.sizeof);
+        int infoLenght;
+        gl::getShaderiv(shaderProgram, gl::GL_INFO_LOG_LENGTH, &infoLenght);
+        char *infoLog = malloc(infoLenght * char.sizeof);
         free(infoLog);
 
-        gl::getShaderInfoLog(shaderProgram, 512, null, infoLog);
-        io::printfn(	"shader(%d) compilation failed:\n"
-			"    %s\n", shaderProgram, infoLog);
+        gl::getShaderInfoLog(shaderProgram, infoLenght, null, infoLog);
+        libc::printf(	"shader(%d) compilation failed:\n"
+			"    %s\n", shaderProgram, *infoLog);
 
         // clear shader
         gl::deleteProgram(shaderProgram);
+        return 0;
     }
 
     return shaderProgram;
