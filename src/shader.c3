@@ -1,5 +1,6 @@
 module shader;
 import opengl::gl;
+import std::math;
 import std::io;
 import libc;
 
@@ -22,16 +23,19 @@ fn Shader compileFromSource(char[] source, ShaderType type) {
     // check for errors
     int success = 0;
     gl::getShaderiv(shader, gl::GL_COMPILE_STATUS, &success);
+
+    // if fails print error log
     if (!success) {
-        // print error log
+        // allocate info buffer
         int infoLength;
         gl::getShaderiv(shader, gl::GL_INFO_LOG_LENGTH, &infoLength);
-        char* infoLog = malloc(infoLength * char.sizeof);
-        free(infoLog);
+        char* infoLog = libc::malloc(infoLength * char.sizeof);
+        defer free(infoLog);
 
+        // get infolog and print it
         gl::getShaderInfoLog(shader, infoLength, null, infoLog);
         libc::printf("shader(%d) compilation failed:\n"
-				   "    %s\n", shader, infoLog);
+                       "%s\n", shader, infoLog);
 
         // clear shader
         gl::deleteShader(shader);
@@ -48,8 +52,8 @@ fn ShaderProgram linkShaders(Shader[] shaders) {
         return 0;
     }
 
-	foreach (shader : shaders)
-	{
+    foreach (shader : shaders)
+    {
         gl::attachShader(shaderProgram, shader);
     }
 
@@ -61,12 +65,12 @@ fn ShaderProgram linkShaders(Shader[] shaders) {
         // print error log
         int infoLenght;
         gl::getShaderiv(shaderProgram, gl::GL_INFO_LOG_LENGTH, &infoLenght);
-        char *infoLog = malloc(infoLenght * char.sizeof);
-        free(infoLog);
+        char *infoLog = libc::malloc(infoLenght * char.sizeof);
+        defer free(infoLog);
 
         gl::getShaderInfoLog(shaderProgram, infoLenght, null, infoLog);
-        libc::printf(	"shader(%d) compilation failed:\n"
-			"    %s\n", shaderProgram, *infoLog);
+        libc::printf("shader(%d) compilation failed:\n"
+                    "%s\n", shaderProgram, *infoLog);
 
         // clear shader
         gl::deleteProgram(shaderProgram);
@@ -74,4 +78,18 @@ fn ShaderProgram linkShaders(Shader[] shaders) {
     }
 
     return shaderProgram;
+}
+
+macro ShaderProgram.setUniform(self, char *name, data) {
+        int location = gl::getUniformLocation(self, name);
+	$switch ($typeof(data))
+		$case Matrix4f:
+			gl::uniformMatrix4fv(location, 1, true, (float*)&data);
+		$default:
+			unreachable("uniform type is not defined");
+        $endswitch
+}
+
+macro ShaderProgram.delete(self) {
+    gl::deleteProgram(self);
 }
