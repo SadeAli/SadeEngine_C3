@@ -5,21 +5,6 @@ import std::collections::list;
 import std::math::vector;
 import sade::draw::naive;
 
-struct Circle {
-    float radius;
-}
-
-union RectAA {
-    struct {
-        float top, bottom;
-        float left, right;
-    }
-    struct {
-        float[<2>] tb;
-        float[<2>] lr;
-    }
-}
-
 struct PhysicsObject2D {
     typeid shape;
     Vec2f velocity;
@@ -38,30 +23,21 @@ fn PhysicsServer2D init() {
     return s;
 }
 
-fn void PhysicsServer2D.applyGravity(self, Vec2f gravity, float deltaTime) {
+
+fn void PhysicsServer2D.step(self, float deltaTime, bool negative = false) {
+    int multiplayer = negative ? -1 : 1;
     foreach (&object : self.objects) {
-        object.velocity += gravity * deltaTime;
-        object.rectAA.bottom += object.velocity.y;
-        object.rectAA.top += object.velocity.y;
-        object.rectAA.left += object.velocity.x;
-        object.rectAA.right += object.velocity.x;
+        object.rectAA.bottom += object.velocity.y * deltaTime * multiplayer;
+        object.rectAA.top += object.velocity.y * deltaTime * multiplayer;
+        object.rectAA.left += object.velocity.x * deltaTime * multiplayer;
+        object.rectAA.right += object.velocity.x * deltaTime * multiplayer;
     }
 }
 
-fn void RectAA.draw(self, float[4] color) {
-    Vec2f[] vertices = {
-        {self.left, self.top},
-        {self.left, self.bottom},
-        {self.right, self.top},
-        {self.right, self.bottom},
-    };
-
-    var $indices = {
-        0, 1, 2,
-        1, 2, 3
-    };
-
-    naive::drawColored(vertices, $indices, color);
+fn void PhysicsServer2D.applyGravity(self, Vec2f gravity, float deltaTime) {
+    foreach (&object : self.objects) {
+        object.velocity += gravity * deltaTime;
+    }
 }
 
 fn void PhysicsServer2D.addCircle(&self, Vec2f position, float radius) {

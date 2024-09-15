@@ -32,7 +32,6 @@ const char[] FS_FLAT = (`
     }
 `);
 
-import sade::physics::server;
 fn int main() {
     Window window = window::init();
     defer window.destroy();
@@ -48,6 +47,7 @@ fn int main() {
     Vec2f position;
     Vec2f size = {200, 200};
 
+    RectAA windowRectAA = window.getRectAA();
     PhysicsServer2D ps = server::init();
     defer ps.free();
 
@@ -57,23 +57,23 @@ fn int main() {
 
     window::clearColor({56, 85, 103, 255});
     while (!window.shouldClose()) {
-        gl::clear(gl::GL_COLOR_BUFFER_BIT);
 
         float movementSpeed = 10;
         Vec2f inputDirection = {
-            (float)window.isKeyDown(key::RIGHT) - (float)window.isKeyDown(key::LEFT),
-            (float)window.isKeyDown(key::UP) - (float)window.isKeyDown(key::DOWN),
+            window.getAxis(key::RIGHT, key::RIGHT),
+            window.getAxis(key::UP, key::DOWN),
         };
 
-        if (position.isInsideWindow(window)) {
-            position += inputDirection * movementSpeed;
-        }
-        if (!position.isInsideWindow(window)) {
-            position -= inputDirection * movementSpeed;
+        ps.applyGravity({0, 1000}, window.frameTime);
+        ps.step(window.frameTime);
+        foreach (&object:ps.objects) {
+            if (!object.rectAA.isInsideRectAA(windowRectAA)) {
+                ps.step(window.frameTime, true);
+                object.velocity = {0,0};
+            }
         }
 
-        ps.applyGravity({0, 10}, window.frameTime);
-        io::printn(ps.objects[0].rectAA.top);
+        gl::clear(gl::GL_COLOR_BUFFER_BIT);
 
         gl::useProgram(shader);
         ps.draw(fgColor);

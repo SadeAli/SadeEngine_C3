@@ -15,3 +15,4 @@ fn Vec2 Window.getCursorPos(self) {
     self.handle.getCursorPosition(&pos.x, &pos.y);
     return pos;
 }
+
