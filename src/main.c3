@@ -32,27 +32,13 @@ const char[] FS_FLAT = (`
     }
 `);
 
-fn bool isRectInsideWindow(Window window, Vec2f pos, Vec2f size) {
-    return pos.isInsideWindow(window) && (pos + size).isInsideWindow(window);
-}
-
-fn bool Vec2f.isInsideWindow(pos, Window window) {
-    Vec2f halfBorder = (Vec2f)window.getSize() / 2;
-
-    if (pos.x > -halfBorder.x && pos.x < halfBorder.x &&
-        pos.y > -halfBorder.y && pos.y < halfBorder.y) {
-        return true;
-    }
-
-    return false;
-}
-
+import sade::physics::server;
 fn int main() {
     Window window = window::init();
     defer window.destroy();
     window::swapInterval(1);
 
-    float[<4>] fgColor = {1.0, 1.0, 0, 1};
+    float[<4>] fgColor = {0.6, 0.8, 0.9, 1};
 
     Shader fs = shader::compileFromSource(VS_2D, gl::GL_VERTEX_SHADER);
     Shader vs = shader::compileFromSource(FS_FLAT, gl::GL_FRAGMENT_SHADER);
@@ -61,6 +47,13 @@ fn int main() {
 
     Vec2f position;
     Vec2f size = {200, 200};
+
+    PhysicsServer2D ps = server::init();
+    defer ps.free();
+
+    ps.addCircle(position, 20);
+    ps.addCircle(position + {50, 00}, 20);
+    ps.addCircle(position - {50, 00}, 20);
 
     window::clearColor({56, 85, 103, 255});
     while (!window.shouldClose()) {
@@ -72,15 +65,18 @@ fn int main() {
             (float)window.isKeyDown(key::UP) - (float)window.isKeyDown(key::DOWN),
         };
 
-        if (isRectInsideWindow(window, position, size)) {
+        if (position.isInsideWindow(window)) {
             position += inputDirection * movementSpeed;
         }
-        if (!isRectInsideWindow(window, position, size)) {
+        if (!position.isInsideWindow(window)) {
             position -= inputDirection * movementSpeed;
         }
 
+        ps.applyGravity({0, 10}, window.frameTime);
+        io::printn(ps.objects[0].rectAA.top);
+
         gl::useProgram(shader);
-        naive::drawRect(position, position + size, fgColor);
+        ps.draw(fgColor);
 
         window.swapBuffers();
         input::pollEvents();

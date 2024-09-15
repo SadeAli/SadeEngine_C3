@@ -30,6 +30,8 @@ import std;
 
 struct Window {
     glfw::window::Window handle;
+    float lastBufferSwap;
+    float frameTime;
 }
 
 def Color = char[<4>];
@@ -67,6 +69,9 @@ fn Window init() {
 	};
 }
 
+fn float Window.getFrameTime(&self) {
+    return self.frameTime;
+}
 
 fn void swapInterval(int interval) {
     glfw::opengl::swapInterval(interval);
@@ -78,13 +83,16 @@ struct HintValuePair @private {
 }
 
 macro bool Window.shouldClose(self) {
-	return (bool)self.handle.shouldClose();
+    return (bool)self.handle.shouldClose();
 }
 
 macro Window.destroy(self) {
     self.handle.destroy();
 }
 
-macro Window.swapBuffers(self) {
-	self.handle.swapBuffers();
+macro Window.swapBuffers(&self) {
+    float currentTime = (float)glfw::getTime();
+    self.frameTime = currentTime - self.lastBufferSwap;
+    self.lastBufferSwap = currentTime;
+    self.handle.swapBuffers();
 }
