@@ -40,3 +40,24 @@ fn bool RectAA.isInsideRectAA(&self, RectAA rect) {
         (self.right < rect.right)
     );
 }
+
+fn bool RectAA.equals(self, RectAA other) {
+    return (
+        (self.top == other.top) &&
+        (self.bottom == other.bottom) &&
+        (self.left == other.left) &&
+        (self.right == other.right)
+    );
+}
+fn bool RectAA.less(self, RectAA other) {
+    return false;
+}
+
+fn bool RectAA.not_equals(self, RectAA other) {
+    return (
+        (self.top != other.top) ||
+        (self.bottom != other.bottom) ||
+        (self.left != other.left) ||
+        (self.right != other.right)
+    );
+}

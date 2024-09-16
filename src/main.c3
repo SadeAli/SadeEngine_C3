@@ -48,12 +48,15 @@ fn int main() {
     Vec2f size = {200, 200};
 
     RectAA windowRectAA = window.getRectAA();
-    PhysicsServer2D ps = server::init();
+    PhysicsServer2D ps = server::init(border: windowRectAA);
     defer ps.free();
 
-    ps.addCircle(position, 20);
-    ps.addCircle(position + {50, 00}, 20);
-    ps.addCircle(position - {50, 00}, 20);
+    for (int i = 0; i < 60; i++) {
+        position = {random::rand(800),
+                    random::rand(200)};
+
+        ps.addCircle(position, 20);
+    }
 
     window::clearColor({56, 85, 103, 255});
     while (!window.shouldClose()) {
@@ -66,12 +69,6 @@ fn int main() {
 
         ps.applyGravity({0, 1000}, window.frameTime);
         ps.step(window.frameTime);
-        foreach (&object:ps.objects) {
-            if (!object.rectAA.isInsideRectAA(windowRectAA)) {
-                ps.step(window.frameTime, true);
-                object.velocity = {0,0};
-            }
-        }
 
         gl::clear(gl::GL_COLOR_BUFFER_BIT);
 

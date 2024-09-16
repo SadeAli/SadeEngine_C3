@@ -35,7 +35,3 @@ fn bool Vec2f.isInsideBorderAA(point, BorderAA b) {
     return false;
 
 }
-
-fn void Circle.update(&self) {
-    
-}
