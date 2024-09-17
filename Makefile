@@ -1,4 +1,5 @@
-c3c=/home/ali/mnt/project/code/everything/c3c/build/c3c
+# c3c=/home/ali/mnt/project/code/everything/c3c/build/c3c
+c3c=/home/ali/mnt/project/code/git/c3c/build/c3c
 # c3c=~/c3c/c3c
 
 build:

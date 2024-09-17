@@ -1,5 +1,5 @@
 module c3_craft;
-import std;
+import std::math;
 import sade;
 import opengl;
 import shader;

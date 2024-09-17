@@ -3,7 +3,7 @@ import sade::physics;
 
 import std::collections::list;
 import std::math::vector;
-import sade::draw::naive;
+import sade::draw::batched;
 
 def PhysicsObjectList2D = List(<PhysicsObject2D>);
 struct PhysicsServer2D {
@@ -68,9 +68,11 @@ fn void PhysicsServer2D.addCircle(&self, Vec2f position, float radius) {
 }
 
 fn void PhysicsServer2D.draw(&self, float[4] color) {
-    foreach (object:self.physicsObjects) {
-        object.rectAA.draw(color);
-    }
+    batched::@drawBatch(;RenderBatch2D *batch) {
+        foreach (object:self.physicsObjects) {
+            batch.drawRectAA(&object.rectAA);
+        }
+    };
 }
 
 fn void PhysicsServer2D.free(&self) {

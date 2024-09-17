@@ -1,5 +1,6 @@
 module sade::draw::naive;
 
+import sade;
 import std::math;
 
 macro void drawRectAA(Vec2f a, Vec2f b, float[4] color) {
@@ -17,3 +18,5 @@ macro void drawRectAA(Vec2f a, Vec2f b, float[4] color) {
 
     drawColored(vertices, $indices, color);
 }
+
+
