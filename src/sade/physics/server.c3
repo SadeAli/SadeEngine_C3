@@ -71,7 +71,7 @@ import std::io;
 fn void PhysicsServer2D.draw(&self, float[4] color) {
     batched::@drawBatch(color; RenderBatch2D *batch) {
         foreach (object:self.physicsObjects) {
-            batch.drawRectAA(&object.rectAA);
+            batch.drawRectAA(object.rectAA);
         }
     };
     /*

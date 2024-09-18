@@ -59,6 +59,7 @@ fn Window init() {
 
 	glfw::window::Window window = glfw::window::create(1920, 1080, "c3 window");
 	window.makeContextCurrent();
+	swapInterval(1);
 
 	window.setKeyCallback(&callback::keyCallback);
 

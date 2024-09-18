@@ -1,6 +1,7 @@
 module c3_craft;
 import std::math;
 import sade;
+import libc;
 import opengl;
 import shader;
 import glfw::keyboard::key;
@@ -35,7 +36,6 @@ const char[] FS_FLAT = (`
 fn int main() {
     Window window = window::init();
     defer window.destroy();
-    window::swapInterval(1);
 
     float[<4>] fgColor = {0.6, 0.8, 0.9, 1};
 
@@ -54,7 +54,7 @@ fn int main() {
     defer ps.free();
 
     for (int i = 0; i < 60; i++) {
-        position = {(float)(rand(1500) - 750), (float)(rand(900) - 450)};
+        position = {(float)(libc::rand()%1500 - 750), (float)(libc::rand()%900 - 450)};
         ps.addCircle(position, 20);
     }
 

@@ -13,7 +13,13 @@ macro @drawBatch(float[4] color;@body(renderBatch)) {
         RenderBatch2D batch = temp_init();
         @body(&batch);
         batch.render(color);
+        batch.destroy();
     };
+}
+
+fn void RenderBatch2D.destroy(&self) {
+    self.indices.free();
+    self.vertices.free();
 }
 
 fn RenderBatch2D temp_init() {
@@ -91,7 +97,7 @@ fn void RenderBatch2D.render(&self, float[4] color) {
     // gl::drawArrays(gl::GL_TRIANGLES, 0, vertexOffset);
 }
 
-fn void RenderBatch2D.drawRectAA(&self, RectAA *rectAA) {
+fn void RenderBatch2D.drawRectAA(&self, RectAA rectAA) {
     Vec2f[] vertices = rectAA.vertices();
     uint[] indices = rectAA.indices();
 
