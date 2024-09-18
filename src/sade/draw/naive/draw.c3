@@ -24,7 +24,7 @@ macro void drawColored(Vec2f[] vertices, uint[] indices, float[4] color) {
     gl::bufferData(gl::GL_ELEMENT_ARRAY_BUFFER, uint.sizeof*indices.len, indices.ptr, gl::GL_STREAM_DRAW);
 
     // enable data
-    gl::vertexAttribPointer(0, vertices[0].len, gl::GL_FLOAT, false, $sizeof(vertices[0]), (void*)0);
+    gl::vertexAttribPointer(0, 2, gl::GL_FLOAT, false, $sizeof(vertices[0]), (void*)0);
     gl::vertexAttribPointer(1, 4, gl::GL_FLOAT, false, $sizeof(color), (void*)(Vec2f.sizeof*vertices.len));
     gl::enableVertexAttribArray(0);  
     gl::enableVertexAttribArray(1);  

@@ -67,7 +67,7 @@ fn int main() {
             window.getAxis(key::UP, key::DOWN),
         };
 
-        ps.applyGravity({0, 1000}, window.frameTime);
+        ps.applyGravity({0, -1000}, window.frameTime);
         ps.step(window.frameTime);
 
         gl::clear(gl::GL_COLOR_BUFFER_BIT);

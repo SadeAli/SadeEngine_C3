@@ -25,21 +25,20 @@ fn RenderBatch2D init() {
     return rb;
 }
 
-// FIX: add vertices and indices
 fn void RenderBatch2D.render(&self, float[4] color) {
-    // count vertices
-    uint vertCount;
-    foreach (vertArray: self.vertices) {
-        vertCount = vertArray.len;
+    // count vertices and indices
+    uint vertexCount;
+    foreach (index, array: self.vertices) {
+        vertexCount += array.len;
+        // io::printfn("%s%s%s", index, ": ", array);
     }
-    io::printn(vertCount);
 
-    uint indCount;
-    foreach (indArray: self.indices) {
-        indCount = indArray.len;
+    uint indexCount;
+    foreach (array: self.indices) {
+        indexCount += array.len;
     }
-    io::printn(indCount);
 
+    // set gpu buffers
     uint vao, vbo, ebo;
     gl::genVertexArrays(1, &vao);
     gl::genBuffers(1, &vbo);
@@ -49,35 +48,58 @@ fn void RenderBatch2D.render(&self, float[4] color) {
     defer gl::deleteBuffers(1, &vbo);
     defer gl::deleteBuffers(1, &ebo);
 
-    // bind
     gl::bindVertexArray(vao);
     gl::bindBuffer(gl::GL_ARRAY_BUFFER, vbo);
     gl::bindBuffer(gl::GL_ELEMENT_ARRAY_BUFFER, ebo);
 
-    // set up data
-    gl::bufferData(gl::GL_ARRAY_BUFFER, (Vec2f.sizeof*vertCount) + float[4].sizeof, null, gl::GL_STREAM_DRAW);
+    // allocate gpu buffers
+    gl::bufferData(gl::GL_ARRAY_BUFFER, (Vec2f.sizeof*vertexCount) + float[4].sizeof, null, gl::GL_STREAM_DRAW);
+    gl::bufferData(gl::GL_ELEMENT_ARRAY_BUFFER, uint.sizeof*indexCount, null, gl::GL_STREAM_DRAW);
+
+    // color
     gl::bufferSubData(gl::GL_ARRAY_BUFFER, 0, float[4].sizeof, &color);
-    foreach (vertArray: self.vertices) {
-        // TODO: implement
+    // vertices
+    uint vboOffset = float[4].sizeof;
+    foreach (array: self.vertices) {
+        uint dataSize = array.len * $sizeof(array[0]);
+        gl::bufferSubData(gl::GL_ARRAY_BUFFER, vboOffset, dataSize, array.ptr);
+        vboOffset += dataSize;
     }
-    gl::bufferData(gl::GL_ELEMENT_ARRAY_BUFFER, uint.sizeof*indCount, null, gl::GL_STREAM_DRAW);
-    foreach (indArray: self.indices) {
-        // TODO: implement
+    // indices
+    uint vertexOffset = 0;
+    uint eboOffset = 0;
+    foreach (index, &array: self.indices) {
+        foreach (&num: *array) {
+            (*num) += vertexOffset;
+        }
+
+        uint dataSize = array.len * uint.sizeof;
+        gl::bufferSubData(gl::GL_ELEMENT_ARRAY_BUFFER, eboOffset, dataSize, array.ptr);
+        eboOffset += dataSize;
+        vertexOffset += self.vertices[index].len;
     }
 
     // enable data
-    gl::vertexAttribDivisor(0, 1000000); 
+    gl::vertexAttribPointer(0, 2, gl::GL_FLOAT, false, Vec2f.sizeof, (void*)$sizeof(color));
+    gl::vertexAttribPointer(1, 4, gl::GL_FLOAT, false, $sizeof(color), (void*)0);
+    gl::enableVertexAttribArray(0);  
+    gl::enableVertexAttribArray(1);  
+    gl::vertexAttribDivisor(1, 1000000); 
 
     // draw
-    gl::drawElements(gl::GL_TRIANGLES, indCount, gl::GL_UNSIGNED_INT, (void*)0);
+    gl::drawElements(gl::GL_TRIANGLES, indexCount, gl::GL_UNSIGNED_INT, (void*)0);
+    // gl::drawArrays(gl::GL_TRIANGLES, 0, vertexOffset);
 }
 
-fn void RenderBatch2D.drawRect(&self, Vec2f pos = {0,0}, Vec2f size = {200,200}) {
-    self.vertices.push(&&shapes::rectVertices(pos, size));
-    self.indices.push(&&shapes::rectIndices());
+fn void RenderBatch2D.drawRect(&batch, Vec2f pos = {0,0}, Vec2f size = {200,200}) {
+    batch.vertices.push(&&shapes::rectVertices(pos, size));
+    batch.indices.push(&&shapes::rectIndices());
 }
 
 fn void RenderBatch2D.drawRectAA(&self, RectAA *rectAA) {
-    self.vertices.push(&&rectAA.vertices());
-    self.indices.push(&&rectAA.indices());
+    Vec2f[] vertices = rectAA.vertices();
+    uint[] indices = rectAA.indices();
+
+    self.vertices.push(vertices);
+    self.indices.push(indices);
 }
