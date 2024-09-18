@@ -93,3 +93,7 @@ macro ShaderProgram.setUniform(self, char *name, data) {
 macro ShaderProgram.delete(self) {
     gl::deleteProgram(self);
 }
+
+macro Shader.delete(self) {
+    gl::deleteShader(self);
+}

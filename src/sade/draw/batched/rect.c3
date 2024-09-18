@@ -8,15 +8,15 @@ struct RenderBatch2D {
     List(<uint[]>) indices;
 }
 
-macro @drawBatch(;@body(renderBatch)) {
+macro @drawBatch(float[4] color;@body(renderBatch)) {
     @pool() {
-        RenderBatch2D batch = init();
+        RenderBatch2D batch = temp_init();
         @body(&batch);
-        batch.render({1,1,1,1});
+        batch.render(color);
     };
 }
 
-fn RenderBatch2D init() {
+fn RenderBatch2D temp_init() {
     RenderBatch2D rb;
 
     rb.vertices.temp_init();
@@ -89,11 +89,6 @@ fn void RenderBatch2D.render(&self, float[4] color) {
     // draw
     gl::drawElements(gl::GL_TRIANGLES, indexCount, gl::GL_UNSIGNED_INT, (void*)0);
     // gl::drawArrays(gl::GL_TRIANGLES, 0, vertexOffset);
-}
-
-fn void RenderBatch2D.drawRect(&batch, Vec2f pos = {0,0}, Vec2f size = {200,200}) {
-    batch.vertices.push(&&shapes::rectVertices(pos, size));
-    batch.indices.push(&&shapes::rectIndices());
 }
 
 fn void RenderBatch2D.drawRectAA(&self, RectAA *rectAA) {

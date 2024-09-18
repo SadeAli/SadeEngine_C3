@@ -42,6 +42,8 @@ fn int main() {
     Shader fs = shader::compileFromSource(VS_2D, gl::GL_VERTEX_SHADER);
     Shader vs = shader::compileFromSource(FS_FLAT, gl::GL_FRAGMENT_SHADER);
     ShaderProgram shader = shader::linkShaders({fs, vs});
+    defer fs.delete();
+    defer vs.delete();
     defer shader.delete();
 
     Vec2f position;
@@ -52,9 +54,7 @@ fn int main() {
     defer ps.free();
 
     for (int i = 0; i < 60; i++) {
-        position = {random::rand(800),
-                    random::rand(200)};
-
+        position = {(float)(rand(1500) - 750), (float)(rand(900) - 450)};
         ps.addCircle(position, 20);
     }
 
