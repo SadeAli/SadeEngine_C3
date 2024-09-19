@@ -74,11 +74,6 @@ fn void PhysicsServer2D.draw(&self, float[4] color) {
             batch.drawRectAA(object.rectAA);
         }
     };
-    /*
-    foreach (index, object:self.physicsObjects) {
-        object.rectAA.draw(color);
-    }
-    */
 }
 
 fn void PhysicsServer2D.free(&self) {

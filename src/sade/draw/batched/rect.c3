@@ -9,25 +9,30 @@ struct RenderBatch2D {
 }
 
 macro @drawBatch(float[4] color;@body(renderBatch)) {
+    RenderBatch2D batch = init();
     @pool() {
-        RenderBatch2D batch = temp_init();
         @body(&batch);
         batch.render(color);
-        batch.destroy();
     };
+    batch.free();
 }
 
-fn void RenderBatch2D.destroy(&self) {
+fn void RenderBatch2D.free(&self) {
     self.indices.free();
     self.vertices.free();
 }
 
+fn RenderBatch2D init() {
+    RenderBatch2D rb;
+    rb.vertices.new_init();
+    rb.indices.new_init();
+    return rb;
+}
+
 fn RenderBatch2D temp_init() {
     RenderBatch2D rb;
-
     rb.vertices.temp_init();
     rb.indices.temp_init();
-
     return rb;
 }
 
@@ -36,7 +41,6 @@ fn void RenderBatch2D.render(&self, float[4] color) {
     uint vertexCount;
     foreach (index, array: self.vertices) {
         vertexCount += array.len;
-        // io::printfn("%s%s%s", index, ": ", array);
     }
 
     uint indexCount;
@@ -94,12 +98,11 @@ fn void RenderBatch2D.render(&self, float[4] color) {
 
     // draw
     gl::drawElements(gl::GL_TRIANGLES, indexCount, gl::GL_UNSIGNED_INT, (void*)0);
-    // gl::drawArrays(gl::GL_TRIANGLES, 0, vertexOffset);
 }
 
 fn void RenderBatch2D.drawRectAA(&self, RectAA rectAA) {
-    Vec2f[] vertices = rectAA.vertices();
-    uint[] indices = rectAA.indices();
+    Vec2f[] vertices = rectAA.temp_vertices();
+    uint[] indices = rectAA.temp_indices();
 
     self.vertices.push(vertices);
     self.indices.push(indices);

@@ -44,30 +44,30 @@ fn void initialize() @init(1023) {
 	glfw::init();
 }
 fn void terminate() @finalizer {
-	glfw::terminate();
+	// glfw::terminate();
 }
 fn Window init() {
-	// set window hints
-	foreach (hint : HintValuePair[]{
-		{hint::CONTEXT_VERSION_MAJOR, 4},
-		{hint::CONTEXT_VERSION_MINOR, 6},
-		{hint::RESIZABLE, 0},
-		{hint::OPENGL_PROFILE, hint::OPENGL_CORE_PROFILE}})
-	{
-		glfw::windowHint(hint.hint, hint.value);
-	}
+    // set window hints
+    foreach (hint : HintValuePair[]{
+	    {hint::CONTEXT_VERSION_MAJOR, 4},
+	    {hint::CONTEXT_VERSION_MINOR, 5},
+	    {hint::RESIZABLE, 0},
+	    {hint::OPENGL_PROFILE, hint::OPENGL_CORE_PROFILE}})
+    {
+        glfw::windowHint(hint.hint, hint.value);
+    }
 
-	glfw::window::Window window = glfw::window::create(1920, 1080, "c3 window");
-	window.makeContextCurrent();
-	swapInterval(1);
+    glfw::window::Window window = glfw::window::create(1920, 1080, "c3 window");
+    window.makeContextCurrent();
+    swapInterval(1);
 
-	window.setKeyCallback(&callback::keyCallback);
+    window.setKeyCallback(&callback::keyCallback);
 
-	gl::viewport(0,0,1920,1080);
+    gl::viewport(0,0,1920,1080);
 
-	return Window{
-	   .handle = window
-	};
+    return Window{
+       .handle = window
+    };
 }
 
 fn float Window.getFrameTime(&self) {

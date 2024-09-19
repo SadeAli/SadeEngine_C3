@@ -1,5 +1,5 @@
 module c3_craft;
-import std::math;
+import std;
 import sade;
 import libc;
 import opengl;
@@ -33,6 +33,7 @@ const char[] FS_FLAT = (`
     }
 `);
 
+def RectAAList = List(<RectAA>);
 fn int main() {
     Window window = window::init();
     defer window.destroy();
@@ -42,12 +43,10 @@ fn int main() {
     Shader fs = shader::compileFromSource(VS_2D, gl::GL_VERTEX_SHADER);
     Shader vs = shader::compileFromSource(FS_FLAT, gl::GL_FRAGMENT_SHADER);
     ShaderProgram shader = shader::linkShaders({fs, vs});
-    defer fs.delete();
-    defer vs.delete();
     defer shader.delete();
 
     Vec2f position;
-    Vec2f size = {200, 200};
+    Vec2f size = {20, 20};
 
     RectAA windowRectAA = window.getRectAA();
     PhysicsServer2D ps = server::init(border: windowRectAA);
@@ -58,22 +57,42 @@ fn int main() {
         ps.addCircle(position, 20);
     }
 
+    position = {0,0};
+    RectAAList rects;
+    rects.new_init();
+    defer rects.free();
+
     window::clearColor({56, 85, 103, 255});
     while (!window.shouldClose()) {
 
         float movementSpeed = 10;
         Vec2f inputDirection = {
-            window.getAxis(key::RIGHT, key::RIGHT),
-            window.getAxis(key::UP, key::DOWN),
+            window.getAxis(key::RIGHT, key::LEFT),
+            window.getAxis(key::UP, key::DOWN)
         };
 
-        ps.applyGravity({0, -1000}, window.frameTime);
-        ps.step(window.frameTime);
+        position += movementSpeed * inputDirection;
+        rects.push({
+            .top = position.y + size.y/2,
+            .bottom = position.y - size.y/2,
+            .left = position.x - size.x/2,
+            .right = position.x + size.x/2,
+        });
+        io::printn(rects.size);
+
+        // ps.applyGravity({0, -1000}, window.frameTime);
+        // ps.step(window.frameTime);
 
         gl::clear(gl::GL_COLOR_BUFFER_BIT);
 
-        gl::useProgram(shader);
-        ps.draw(fgColor);
+        gl::useProgram(shader);glfwSetErrorCallback
+        // ps.draw(fgColor);
+
+        batched::@drawBatch(fgColor; RenderBatch2D *batch) {
+            foreach(rect:rects) {
+                batch.drawRectAA(rect);
+            }
+        };
 
         window.swapBuffers();
         input::pollEvents();
