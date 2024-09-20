@@ -1,4 +1,4 @@
-module sade::shapes;
+module sade::shapes::rect_aa;
 import sade;
 import std;
 
@@ -52,4 +52,13 @@ macro uint[] RectAA.temp_indices(&self) {
     index_array[..] = indices;
 
     return index_array;
+}
+
+macro RectAA from_position(Vec2f position, Vec2f size) {
+    return {
+            .top = position.y + size.y/2,
+            .bottom = position.y - size.y/2,
+            .left = position.x - size.x/2,
+            .right = position.x + size.x/2,
+    };
 }

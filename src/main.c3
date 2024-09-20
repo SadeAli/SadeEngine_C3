@@ -33,6 +33,7 @@ const char[] FS_FLAT = (`
     }
 `);
 
+
 def RectAAList = List(<RectAA>);
 fn int main() {
     Window window = window::init();
@@ -47,17 +48,6 @@ fn int main() {
 
     Vec2f position;
     Vec2f size = {20, 20};
-
-    RectAA windowRectAA = window.getRectAA();
-    PhysicsServer2D ps = server::init(border: windowRectAA);
-    defer ps.free();
-
-    for (int i = 0; i < 60; i++) {
-        position = {(float)(libc::rand()%1500 - 750), (float)(libc::rand()%900 - 450)};
-        ps.addCircle(position, 20);
-    }
-
-    position = {0,0};
     RectAAList rects;
     rects.new_init();
     defer rects.free();
@@ -72,23 +62,12 @@ fn int main() {
         };
 
         position += movementSpeed * inputDirection;
-        rects.push({
-            .top = position.y + size.y/2,
-            .bottom = position.y - size.y/2,
-            .left = position.x - size.x/2,
-            .right = position.x + size.x/2,
-        });
-        io::printn(rects.size);
-
-        // ps.applyGravity({0, -1000}, window.frameTime);
-        // ps.step(window.frameTime);
+        rects.push(rect_aa::from_position(position, size));
 
         gl::clear(gl::GL_COLOR_BUFFER_BIT);
 
-        gl::useProgram(shader);glfwSetErrorCallback
-        // ps.draw(fgColor);
-
-        batched::@drawBatch(fgColor; RenderBatch2D *batch) {
+        gl::useProgram(shader);
+        batched::@draw(fgColor; RenderBatch2D *batch) {
             foreach(rect:rects) {
                 batch.drawRectAA(rect);
             }

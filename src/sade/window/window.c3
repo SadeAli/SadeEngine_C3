@@ -44,7 +44,7 @@ fn void initialize() @init(1023) {
 	glfw::init();
 }
 fn void terminate() @finalizer {
-	// glfw::terminate();
+	glfw::terminate();
 }
 fn Window init() {
     // set window hints

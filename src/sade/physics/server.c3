@@ -69,7 +69,7 @@ fn void PhysicsServer2D.addCircle(&self, Vec2f position, float radius) {
 
 import std::io;
 fn void PhysicsServer2D.draw(&self, float[4] color) {
-    batched::@drawBatch(color; RenderBatch2D *batch) {
+    batched::@draw(color; RenderBatch2D *batch) {
         foreach (object:self.physicsObjects) {
             batch.drawRectAA(object.rectAA);
         }

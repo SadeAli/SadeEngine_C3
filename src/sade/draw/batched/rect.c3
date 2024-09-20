@@ -8,7 +8,9 @@ struct RenderBatch2D {
     List(<uint[]>) indices;
 }
 
-macro @drawBatch(float[4] color;@body(renderBatch)) {
+macro @drawBatch(float[4] color; @body(renderBatch)) @deprecated("use @draw()") => @draw(color; RenderBatch2D *batch) {@body(batch);};
+
+macro @draw(float[4] color; @body(renderBatch)) {
     RenderBatch2D batch = init();
     @pool() {
         @body(&batch);
