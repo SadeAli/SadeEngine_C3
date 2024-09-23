@@ -4,7 +4,6 @@ import sade;
 import libc;
 import opengl;
 import shader;
-import glfw::keyboard::key;
 
 const char[] VS_2D = (`
     #version 330 core
@@ -33,8 +32,6 @@ const char[] FS_FLAT = (`
     }
 `);
 
-
-def RectAAList = List(<RectAA>);
 fn int main() {
     Window window = window::init();
     defer window.destroy();
@@ -44,33 +41,23 @@ fn int main() {
     Shader fs = shader::compileFromSource(VS_2D, gl::GL_VERTEX_SHADER);
     Shader vs = shader::compileFromSource(FS_FLAT, gl::GL_FRAGMENT_SHADER);
     ShaderProgram shader = shader::linkShaders({fs, vs});
-    defer shader.delete();
-
-    Vec2f position;
-    Vec2f size = {20, 20};
-    RectAAList rects;
-    rects.new_init();
-    defer rects.free();
+    
+    Image flappy_sprite = image::load("../resources/images/flappy_bird_sprite_sheet.png", 4);
+    defer flappy_sprite.free();
 
     window::clearColor({56, 85, 103, 255});
     while (!window.shouldClose()) {
 
         float movementSpeed = 10;
         Vec2f inputDirection = {
-            window.getAxis(key::RIGHT, key::LEFT),
-            window.getAxis(key::UP, key::DOWN)
+            window.getAxis(Key.RIGHT, Key.LEFT),
+            window.getAxis(Key.UP, Key.DOWN)
         };
-
-        position += movementSpeed * inputDirection;
-        rects.push(rect_aa::from_position(position, size));
 
         gl::clear(gl::GL_COLOR_BUFFER_BIT);
 
         gl::useProgram(shader);
         batched::@draw(fgColor; RenderBatch2D *batch) {
-            foreach(rect:rects) {
-                batch.drawRectAA(rect);
-            }
         };
 
         window.swapBuffers();

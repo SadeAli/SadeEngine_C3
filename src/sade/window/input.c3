@@ -1,5 +1,5 @@
 module sade::window::input;
-import glfw::keyboard;
+import sade::window::input::key;
 import glfw::input;
 
 const uint MAX_KEYS = 512;

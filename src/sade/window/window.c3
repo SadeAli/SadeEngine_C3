@@ -25,7 +25,7 @@ module sade::window;
 import glfw;
 import libc;
 import opengl::gl;
-import sade::window::callback @public;
+import sade::window::glfw::callback @public;
 import std;
 
 struct Window {
